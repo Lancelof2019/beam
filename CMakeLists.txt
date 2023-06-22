@@ -20,10 +20,10 @@ SET(CLEAN_UP_FILES
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.3.0)
 
-# 寻找Eigen库的位置
+# seek eigen
 find_package(Eigen3 REQUIRED)
 
-# 将Eigen库包含到deal.II中
+# include eigen in dealii
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 FIND_PACKAGE(deal.II 9.3.0 QUIET 
