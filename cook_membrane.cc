@@ -2513,8 +2513,7 @@ int main (int argc, char *argv[])
 */
 
 
-
-       Eigen::SparseMatrix<double> eigen_tangent_matrix(solid_3d.tangent_matrix.m(), solid_3d.tangent_matrix.n());
+Eigen::SparseMatrix<double> eigen_tangent_matrix(solid_3d.tangent_matrix.m(), solid_3d.tangent_matrix.n());
        for (unsigned int i = 0; i < solid_3d.tangent_matrix.n(); ++i) {
           for (dealii::BlockSparseMatrix<double>::const_iterator it = solid_3d.tangent_matrix.begin(i);
              it !=solid_3d.tangent_matrix.end(i); ++it) {
@@ -2534,7 +2533,9 @@ int main (int argc, char *argv[])
     // std::cout<<"det is:"<<det<<std::endl;
      std::cout<<"rank is:"<<rank<<std::endl;
 
-    
+
+     int inv_rank =inv_dense_matrix.fullPivLu().rank();
+     std::cout<<"inv rank is:"<<rank<<std::endl;
 
        // eigen_tangent_matrix.makeCompressed();
 
@@ -2544,18 +2545,18 @@ int main (int argc, char *argv[])
          //BlockVector<double> adjoint_rhs=
          solid_3d.system_rhs/=l2_norm;
          std::cout<<"norm after norm "<<solid_3d.system_rhs.l2_norm()<<std::endl;
-         
+
          Eigen::VectorXd eigen_vector(solid_3d.system_rhs.size());
-	 for (unsigned int i = 0; i < solid_3d.system_rhs.size(); ++i) {
+         for (unsigned int i = 0; i < solid_3d.system_rhs.size(); ++i) {
              eigen_vector(i) = solid_3d.system_rhs[i];
          }
 
 
         Eigen::VectorXd adjoint(solid_3d.system_rhs.size());
 
-        adjoint=dense_matrix*eigen_vector;
+        adjoint=inv_dense_matrix*eigen_vector;
         double normValue=adjoint.norm();
-        std::cout<<"norm for check"<<normValue<<std::endl;
+        std::cout<<"norm for adoint vector check:"<<normValue<<std::endl;
 
 	/* int get_rows=solid_3d.tangent_matrix.m();
 	 int get_cols=solid_3d.tangent_matrix.n();
