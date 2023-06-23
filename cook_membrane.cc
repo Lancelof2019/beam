@@ -2540,8 +2540,8 @@ int main (int argc, char *argv[])
 
        // eigen_tangent_matrix.makeCompressed();
 
-         double l1_norm=solid_3d.system_rhs.l1_norm();
-         double l2_norm=solid_3d.system_rhs.l2_norm();
+         //double l1_norm=solid_3d.system_rhs.l1_norm();
+         double l2_norm=solid_3d.olution_n.l2_norm();
       //   std::cout<<"before norm (0,0)"<<solid_3d.system_rhs[0]<<std::endl;
          //BlockVector<double> adjoint_rhs=
          //solid_3d.system_rhs/=l2_norm;
