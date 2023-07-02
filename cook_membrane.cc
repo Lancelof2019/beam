@@ -2649,6 +2649,9 @@ int main (int argc, char *argv[])
          Eigen::ArrayXd grad=adjoint.array()*eigen_vector.array();
 
 	 std::cout<<"some value in grad:"<<grad[25]<<std::endl;
+		 
+	  solid_3d.compute_gradient();
+	  std::cout<<solid_3d.gradient[45]<<std::endl;
 	 //std::cout<<"norm of grad :"<<grad.lpNorm<2>()<<std::endl;
 
 	/* int get_rows=solid_3d.tangent_matrix.m();
@@ -2759,8 +2762,8 @@ int main (int argc, char *argv[])
           Solid<dim,NumberType> solid_3d(parameters);
           solid_3d.run();
 	 
-	  solid_3d.compute_gradient();
-	  std::cout<<solid_3d.gradient[45]<<std::endl;
+	//  solid_3d.compute_gradient();
+	  //std::cout<<solid_3d.gradient[45]<<std::endl;
           //BlockSparseMatrix<double> copy_global_stiff=0.0;
           //get_global_stiff(solid_3d,copy_global_stiff);
 
