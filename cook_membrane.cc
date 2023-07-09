@@ -963,21 +963,21 @@ namespace Cook_Membrane
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-     Vector<double>     density;
-     Vector<double>     gradient;
+     //Vector<double>     density;
+     //Vector<double>     gradient;
      //density.reinit(dof_handler_ref.n_dofs());
      //gradient.reinit(dof_handler_ref.n_dofs());
      //
      //
      //
-     //void compute_density();
+    // void compute_density();
      //void compute_gradient();
     // std::vector<std::vector<NumberType>> density_gradient(triangulation.n_active_cells(), std::vector<NumberType>(dim, 0.0));
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-    Vector<double> d_gradients;
-    void  compute_density_gradient();
+//    Vector<double> d_gradients;
+  //  void  compute_density_gradient();
 
   };
 
@@ -1046,25 +1046,36 @@ namespace Cook_Membrane
 //
 //
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-  /*template <int dim,typename NumberType>
+/*
+template <int dim,typename NumberType>
 
 void Solid<dim,NumberType>::compute_density()
 {
-  typename DoFHandler<dim>::active_cell_iterator cell = dof_handler_ref.begin_active(),
-                                                 endc = dof_handler_ref.end();
 
+  const FESystem<dim> testfe(FE_Q<dim>(1), dim);
+  DoFHandler<dim> test_dof_handler_ref(triangulation);	
+  //testfe(FE_Q<dim>(1), dim);
+  //test_dof_handler_ref(triangulation);
+  test_dof_handler_ref.distribute_dofs(testfe);
+  Vector<double> test_density;
+  test_density.reinit(triangulation.n_active_cells());
+  typename DoFHandler<dim>::active_cell_iterator cell = test_dof_handler_ref.begin_active(),
+                                                 endc = test_dof_handler_ref.end();
+  int pec=0;
   for (; cell != endc; ++cell)
   {
     // Compute the grid density for each cell, e.g., the inverse of the cell volume
-    density[cell->active_cell_index()] = 1.0 / cell->measure();
-    std::cout<<"active_cell_index :"<<cell->active_cell_index()<<std::endl;
+    test_density[cell->active_cell_index()] = 1.0 / cell->measure();
+    std::cout<<"------------------------active_cell_index :"<<cell->active_cell_index()<<"----------------------------------"<<std::endl;
+    std::cout<<"density of ["<<pec<<"]:"<<test_density[cell->active_cell_index()]<<std::endl;
+    pec++;
   }
 }
-
+*/
 
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+/*
 template <int dim,typename NumberType>
 
 
@@ -1133,7 +1144,7 @@ void Solid<dim,NumberType>::compute_density_gradient()
 
 */
 
-
+/*
 template <int dim,typename NumberType>
 void Solid<dim,NumberType>::compute_density_gradient(){
   DoFHandler<3> dof_handler(triangulation);
@@ -1144,6 +1155,10 @@ void Solid<dim,NumberType>::compute_density_gradient(){
   Vector<double> density_gradients(triangulation.n_active_cells());
   
   
+
+
+
+
   density_gradients(triangulation.n_active_cells());
   unsigned int cell_index = 0;
   for (const auto &cell : dof_handler.active_cell_iterators())
@@ -1152,39 +1167,62 @@ void Solid<dim,NumberType>::compute_density_gradient(){
     for (unsigned int i = 0; i < dofs_per_cell; ++i)
     {
       cell_vertices[i] = cell->vertex(i);
-    }
 
-    Point<3> gradient;
+     // std::cout<<"---------------------------------------------------"<<std::endl;
+       //   std::cout<<cell<<"["<<cell_index<<"]"<<"["<<cell_vertices[i][0]<<","<<cell_vertices[i][1]<<","<<cell_vertices[i][2]<<"]"<<std::endl;
+          //std::cout<<cell<<"["<<j<<",0]"cell_vertices[j][0]<<std::endl;
+
+    }
+      //std::cout<<"---------------------------------------------------"<<std::endl;
+    Point<3> gradient={0,0,0};
 
     for (unsigned int j = 0; j < dofs_per_cell; ++j)
     {
       for (unsigned int k = 0; k < dofs_per_cell; ++k)
       {
         if (j != k)
-        {
-          gradient += (cell_vertices[j] - cell_vertices[k]) /
-                      (cell_vertices[j] - cell_vertices[k]).norm();
+        { 
+          //std::cout<<"---------------------------------------------------"<<std::endl;
+	  //std::cout<<cell<<"["<<j<<"]"cell_vertices[j][0]<<std::endl;
+	  //std::cout<<cell<<"["<<j<<",0]"cell_vertices[j][0]<<std::endl;
+	  //std::cout<<cell<<"["<<j<<",1]"cell_vertices[j][1]<<std::endl;
+	  //std::cout<<cell<<"["<<j<<",2]"cell_vertices[j][2]<<std::endl;
+	 double  l1_coord_norm=std::abs(cell_vertices[j][0] - cell_vertices[k][0])+std::abs(cell_vertices[j][1] - cell_vertices[k][1])+std::abs(cell_vertices[j][2] - cell_vertices[k][2]);
+         // gradient += (cell_vertices[j] - cell_vertices[k]) /(cell_vertices[j] - cell_vertices[k]).norm();
+//	std::cout<<"["<<cell_index<<"]-l1_coord_norm"<<":["<<j<<"-"<<k<<"].l1_norm"<<l1_coord_norm<<std::endl;
+  //      std::cout<<"["<<cell_index<<"]-value0:"<<abs(cell_vertices[j][0] - cell_vertices[k][0])<<std::endl;
+//	std::cout<<"["<<cell_index<<"]-value1:"<<abs(cell_vertices[j][1] - cell_vertices[k][1])<<std::endl;
+//	std::cout<<"["<<cell_index<<"]-value2:"<<abs(cell_vertices[j][2] - cell_vertices[k][2])<<std::endl;
+	Point<3> temp_gradient;
+	temp_gradient=cell_vertices[j] - cell_vertices[k];
+	std::cout<<"-------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>temp_gradient[0]:"<<temp_gradient[0]<<std::endl;
+	temp_gradient[0]=temp_gradient[0];//l1_coord_norm;
+	std::cout<<"-------------------------->>>>>>>>>>>>>>>temp_gradient[0]/l1_norm"<<temp_gradient[0]<<std::endl;
+	temp_gradient[1]=temp_gradient[1];//l1_coord_norm;
+	temp_gradient[2]=temp_gradient[2];//l1_coord_norm;
+	 // gradient += (cell_vertices[j] - cell_vertices[k])/l1_coord_norm;
+	gradient=gradient+temp_gradient;
+	//std::cout<<"The value of gradient in cell["<<cell_index<<"] gradient------>"<<"["<<gradient[0]<<","<<gradient[1]<<","<<gradient[2]<<"]"<<std::endl;
+	
         }
       }
     }
 
-    density_gradients(cell_index) = gradient.norm();
+
+    //std::cout<<"---------------------------------------------------"<<std::endl;
+    std::cout<<"<<<<<<<<<<<<<<<<<<<<gradient["<<cell_index<<"]"<<"["<<gradient[0]<<","<<gradient[1]<<","<<gradient[2]<<"]>>>>>>>>>>>>>>>"<<std::endl;
+    double l1_gradient_norm=std::abs(gradient[0])+std::abs(gradient[1])+std::abs(gradient[2]);
+    //density_gradients(cell_index) = gradient.norm();
+    density_gradients(cell_index) =l1_gradient_norm;
     ++cell_index;
+    gradient={0,0,0};
   }
 
-/* 
-   std::cout<<"---------------density_gradient finished-------------------------"<<std::endl;
-   int den_size=density_gradients.size();
-   for(int i=0;i<den_size;i++){
-      std::cout<<"The ["<<i<<"] element:"<<density_gradients[i]<<std::endl;
-
-  }
-*/
    d_gradients=density_gradients;
 
 }
 
-
+*/
 
 
 
@@ -1222,28 +1260,28 @@ void Solid<dim,NumberType>::compute_density_gradient(){
       }
 
     // Lastly, we print the vertical tip displacement of the Cook cantilever
-    // after the full load is applied
+   
     //
     //>>>>>>>>>>>>>>>>>>>>change>>>>>>>>>>>>>>>>>>>>>>>>>>>
    // density.reinit(dof_handler_ref.n_dofs());
    //
-    std::cout<<"dof_handler_ref.n_dofs():"<<dof_handler_ref.n_dofs()<<std::endl;
-   density.reinit(triangulation.n_active_cells());
+  //  std::cout<<"dof_handler_ref.n_dofs():"<<dof_handler_ref.n_dofs()<<std::endl;
+//   density.reinit(triangulation.n_active_cells());
     
    // gradient.reinit(dof_handler_ref.n_dofs());
-   std::cout<<"triangulation.n_active_cells():"<<triangulation.n_active_cells()<<std::endl;    
-   gradient.reinit(triangulation.n_active_cells());
+   //std::cout<<"triangulation.n_active_cells():"<<triangulation.n_active_cells()<<std::endl;    
+   //gradient.reinit(triangulation.n_active_cells());
    
    //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     print_vertical_tip_displacement();
 
    // std::cout<<"Density claculation"<<std::endl;
-   // compute_density();
+  //  compute_density();
 
     //sleep(15);
    // std::cout<<"Gradient calculation"<<std::endl;
    // compute_gradient();
-   compute_density_gradient();
+   //compute_density_gradient();
   }
 
 
@@ -1288,15 +1326,15 @@ void Solid<dim,NumberType>::compute_density_gradient(){
     // Only allow one element through the thickness
     // (modelling a plane strain condition)
     if (dim == 3){
-     repetitions[dim-1] = 2;
+     repetitions[dim-1] = 8;
     
     //repetitions[0] = 0;
-    repetitions[1] = 2;
-    repetitions[2] = 2;
+    //repetitions[1] = 2;
+    //repetitions[2] = 2;
     }
 
-    repetitions[1] = 4;
-    repetitions[2] = 4;
+    repetitions[1] = 8;
+    repetitions[2] = 8;
 //    const Point<dim> bottom_left = (dim == 3 ? Point<dim>(0.0, 0.0, -0.5) : Point<dim>(0.0, 0.0));
   //  const Point<dim> top_right = (dim == 3 ? Point<dim>(48.0, 44.0, 0.5) : Point<dim>(48.0, 44.0));
         const Point<dim> top_right =Point<dim>(0.0, 0.0, -10); 
@@ -2691,7 +2729,7 @@ int main (int argc, char *argv[])
          // std::cout<<"test 0,0"<<copy_global_stiff(0,0)<<std::endl;
          // std::cout<<"test end,end"<<copy_global_stiff(copy_global_stiff.m()-1,copy_global_stiff.n()-1)<<std::endl;
           std::cout<< "rows:"<<solid_3d.system_rhs.size()<<std::endl;
-          std::cout<< "cols:"<<solid_3d.system_rhs.n_blocks()<<std::endl;
+          std::cout<< "block of object:"<<solid_3d.system_rhs.n_blocks()<<std::endl;
 	 // std::cout<< solid_3d.system_rhs.block_size()<<std::endl;
 	 
 	// std::cout<< "L1 norm:"<<solid_3d.system_rhs.l1_norm()<<std::endl;
@@ -2710,6 +2748,7 @@ int main (int argc, char *argv[])
 
 
        Eigen::SparseMatrix<double> eigen_tangent_matrix(solid_3d.tangent_matrix.m(), solid_3d.tangent_matrix.n());
+       #pragma omp parallel for
        for (unsigned int i = 0; i < solid_3d.tangent_matrix.n(); ++i) {
           for (dealii::BlockSparseMatrix<double>::const_iterator it = solid_3d.tangent_matrix.begin(i);
              it !=solid_3d.tangent_matrix.end(i); ++it) {
@@ -2724,6 +2763,49 @@ int main (int argc, char *argv[])
 
 
 
+//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>A=B^TDB
+
+   Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(dense_matrix);
+    if (eigensolver.info() != Eigen::Success) {
+        std::cout << "Failed to compute eigenvalues." << std::endl;
+        return 1;
+    }
+   Eigen::VectorXd eigenvalues = eigensolver.eigenvalues();
+   Eigen::MatrixXd eigenvectors = eigensolver.eigenvectors();
+
+
+
+   Eigen::MatrixXd B = eigenvectors;
+   Eigen::MatrixXd D = Eigen::MatrixXd::Zero(B.cols(), B.cols());
+
+  //build matrix D:
+  std::cout<<">>>>>>>>>>>>>>>>>>>>>>>>>>>value of D<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<std::endl;
+   #pragma omp parallel for
+   for (int i = 0; i < B.cols(); i++) {
+        D(i, i) = std::sqrt(eigenvalues(i));
+//	std::cout<<D(i, i)<<std::endl;
+    }
+
+   
+   Eigen::VectorXd solver_vector(solid_3d.solution_n.size());
+
+   #pragma omp  parallel for
+   for (unsigned int i = 0; i < solid_3d.solution_n.size(); ++i) {
+             solver_vector(i) = solid_3d.solution_n[i];
+         }
+
+
+    Eigen::VectorXd solver_gradient=-1*inv_dense_matrix*D*solver_vector;
+
+
+
+
+ //  std::cout<<"value of D"<<endl;
+   
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
  //    double det = dense_matrix.determinant();
      //int rank = dense_matrix.fullPivLu().rank();
     // std::cout<<"det is:"<<det<<std::endl;
@@ -2736,19 +2818,19 @@ int main (int argc, char *argv[])
        // eigen_tangent_matrix.makeCompressed();
 
        //  double l1_norm=solid_3d.system_rhs.l1_norm();
-         double l2_norm=solid_3d.solution_n.l2_norm();
+//         double l2_norm=solid_3d.solution_n.l2_norm();
       //   std::cout<<"before norm (0,0)"<<solid_3d.system_rhs[0]<<std::endl;
          //BlockVector<double> adjoint_rhs=
          //solid_3d.system_rhs/=l2_norm;
          
-	 solid_3d.solution_n/=l2_norm;
+//	 solid_3d.solution_n/=l2_norm;
 	 
 	 //std::cout<<"norm after norm "<<solid_3d.system_rhs.l2_norm()<<std::endl;
          
-         std::cout<<"solution after norm "<<solid_3d.solution_n.l2_norm()<<std::endl;
+  //       std::cout<<"solution after norm "<<solid_3d.solution_n.l2_norm()<<std::endl;
 
-         Eigen::VectorXd eigen_vector(solid_3d.solution_n.size());
-	 for (unsigned int i = 0; i < solid_3d.solution_n.size(); ++i) {
+    //     Eigen::VectorXd eigen_vector(solid_3d.solution_n.size());
+/*	 for (unsigned int i = 0; i < solid_3d.solution_n.size(); ++i) {
              eigen_vector(i) = solid_3d.solution_n[i];
          }
 
@@ -2759,16 +2841,24 @@ int main (int argc, char *argv[])
         double normValue=adjoint.norm();
         std::cout<<"norm for adoint vector check:"<<normValue<<std::endl;
 
+*/
+     //    Eigen::ArrayXd grad=adjoint.array()*eigen_vector.array();
 
-         Eigen::ArrayXd grad=adjoint.array()*eigen_vector.array();
+	// std::cout<<"---------------some value in grad:---------------"<<std::endl;
 
-	 std::cout<<"some value in grad:"<<grad[25]<<std::endl;
+        // for(int j=0;j<solid_3d.d_gradients.size();j++){
 
-         std::cout<<"-------------------------Test-----------------------------------"<<std::endl;
-         for(int i=0;i<solid_3d.d_gradients.size();i++){
-            std::cout<<"The ["<<i<<"] element:"<<solid_3d.d_gradients[i]<<std::endl;
+
+          //    std::cout<<"The ["<<j<<"] element:"<<grad[j]<<std::endl;
+
+	// }
+
+
+         //std::cout<<"-------------------------Test-----------------------------------"<<std::endl;
+         //for(int i=0;i<solid_3d.d_gradients.size();i++){
+           // std::cout<<"The ["<<i<<"] element:"<<solid_3d.d_gradients[i]<<std::endl;
  
-          }
+         // }
 
 
 
