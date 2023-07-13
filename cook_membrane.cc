@@ -2762,14 +2762,22 @@ int main (int argc, char *argv[])
 
    
    Eigen::VectorXd solver_vector(solid_3d.solution_n.size());
+   Eigen::VectorXd obj_det(solid_3d.solution_n.size());
 
-   #pragma omp  parallel for
+   double norm2_value;
+		
+   //#pragma omp  parallel for 
    for (unsigned int i = 0; i < solid_3d.solution_n.size(); ++i) {
              solver_vector(i) = solid_3d.solution_n[i];
+	     obj_det(i)= solid_3d.solution_n[i];
+	     norm2_value+=std::pow(solid_3d.solution_n[i],2);
          }
 
+       norm2_value=std::sqrt(norm2_value);
 
-    Eigen::VectorXd solver_gradient=-1*inv_dense_matrix*D*solver_vector;
+
+		
+    Eigen::VectorXd solver_gradient=-1*(obj_det/norm2_value).transpose()*inv_dense_matrix*D*solver_vector;
 
 
 
