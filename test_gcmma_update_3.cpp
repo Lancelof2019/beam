@@ -6,7 +6,9 @@
 #include <cstring>
 #include <cmath>
 #include "cc_membrane.cc"
-
+#include <Eigen/Dense>
+#include <Eigen/SparseLU>
+#include <Eigen/Sparse>
 double Squared(double x) { return x*x; }
 
 struct Problem {
