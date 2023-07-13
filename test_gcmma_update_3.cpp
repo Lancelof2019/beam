@@ -19,6 +19,7 @@ struct Problem {
 	int dofs_all_num;
 	double norm_value;
 	double x_density_coff;
+        double norm2_value;
     //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
       deallog.depth_console(0);
       Parameters::AllParameters parameters("parameters.prm");
@@ -90,9 +91,10 @@ struct Problem {
 			
 			//f0x[i]=dense_matrix[i];
 			fx[0]+=abs(f0x[i]);
+			norm2_value+=std::pow(f0x[i],2);
 		}
 				
-				
+			norm2_value=std::sqrt(norm2_value);
 				
 		for(int j=0;j<;j++){
 			if(fx[1]<=0){
@@ -109,7 +111,7 @@ struct Problem {
 	  
 	Eigen::VectorXd df0dx_vector(dofs_all_num);
 	for(int i=0;i<dofs_all_num;i++){
-	   df0dx[i]=f0x[i]/fx[0];
+	   df0dx[i]=f0x[i]/norm2_value;
 	   df0dx_vector[i]=df0dx[i];
 	 }//求出目标函数导数df0dx
 			
