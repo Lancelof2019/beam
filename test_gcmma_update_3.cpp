@@ -132,7 +132,7 @@ struct Problem {
         for (unsigned int i = 0; i < solid_3d.solution_n.size(); ++i) {
              solver_vector(i) = solid_3d.solution_n[i];
          }
-        Eigen::VectorXd solver_gradient=-df0dx_vector*inv_dense_matrix*D*solver_vector;
+        Eigen::VectorXd solver_gradient=-1*df0dx_vector*inv_dense_matrix*D*solver_vector;
 	   
 	 for(int i=0;i<dofs_all_num;i++){
 	   
