@@ -57,10 +57,11 @@ struct Problem {
         }
 		
 	   dofs_all_num=solid_3d.tangent_matrix.m();
-	   cell_array=new double[dofs_all_num];
+	   int active_cells=solid_3d.n_active_cells();
+	   cell_array=new double[active_cells];
 	   #pragma omp parallel for
 	   for(int i=0;i<n;i++){
-		   cell_array[i]=x_density_percell;
+		cell_array[i]=x_density_percell;
 	   }
 	   
 	  
@@ -97,7 +98,7 @@ struct Problem {
 		    norm2=std::sqrt(norm2);	
 				
 				
-		for(int j=0;j<;j++){
+		for(int j=0;j<active_cells;j++){
 			if(fx[1]<=0){
 			fx[1]+=cell_array[i]-0.5*1;//constraint function
 			}
@@ -112,8 +113,8 @@ struct Problem {
 	    Eigen::VectorXd df0dx_vector(dofs_all_num);
 	    for(int i=0;i<dofs_all_num;i++){
 			
-			df0dx[i]=f0x[i]/norm2;
-			df0dx_vector[i]=df0dx[i];
+		df0dx[i]=f0x[i]/norm2;
+		df0dx_vector[i]=df0dx[i];
 		}//求出目标函数导数df0dx
 			
 		
