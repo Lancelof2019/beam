@@ -18,69 +18,8 @@ struct Problem {
 	double norm_value;
 	double x_density_coff;
 	Eigen::MatrixXd dense_matrix ;
-    Eigen::MatrixXd inv_dense_matrix ;
+        Eigen::MatrixXd inv_dense_matrix ;
 	Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver;
-    //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-/*      deallog.depth_console(0);
-      Parameters::AllParameters parameters("parameters.prm");
-      if (parameters.automatic_differentiation_order == 0)
-        {
-          std::cout << "Assembly method: Residual and linearisation are computed manually." << std::endl;
-
-          // Allow multi-threading
-          Utilities::MPI::MPI_InitFinalize mpi_initialization(argc, argv,
-                                                              dealii::numbers::invalid_unsigned_int);
-
-          typedef double NumberType;
-          Solid<dim,NumberType> solid_3d(parameters);
-          solid_3d.run();
-        }
-	   
-       double problem_mu=solid_3d.mu;//density of object
-	   
-	   int active_cells=solid_3d.dofs_per_cell;//numbers of cells
-	   
-	   dofs_all_num=solid_3d.tangent_matrix.m();
-	   
-	   Eigen::SparseMatrix<double> eigen_tangent_matrix(solid_3d.tangent_matrix.m(), solid_3d.tangent_matrix.n());
-       #pragma omp parallel for
-       for (unsigned int i = 0; i < solid_3d.tangent_matrix.n(); ++i) {
-          for (dealii::BlockSparseMatrix<double>::const_iterator it = solid_3d.tangent_matrix.begin(i);
-             it !=solid_3d.tangent_matrix.end(i); ++it) {
-             eigen_tangent_matrix.insert(it->row(), it->column()) = it->value();
-          }
-        }
-		
-		
-		Eigen::MatrixXd dense_matrix = eigen_tangent_matrix.toDense();
-        Eigen::MatrixXd inv_dense_matrix = dense_matrix.inverse();
-		Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(dense_matrix);
-        
-		if (eigensolver.info() != Eigen::Success) {
-           std::cout << "Failed to compute eigenvalues." << std::endl;
-        return 1;
-       }
-	   */
-        /*Eigen::VectorXd eigenvalues = eigensolver.eigenvalues();
-        Eigen::MatrixXd eigenvectors = eigensolver.eigenvectors();
-		Eigen::MatrixXd B = eigenvectors;
-        Eigen::MatrixXd D = Eigen::MatrixXd::Zero(B.cols(), B.cols());
-		#pragma omp parallel for
-        for (int i = 0; i < B.cols(); i++) {
-          D(i, i) = std::sqrt(eigenvalues(i));
-        }
-		   Eigen::VectorXd solver_vector(solid_3d.solution_n.size());
-
-       #pragma omp  parallel for
-       for (unsigned int i = 0; i < solid_3d.solution_n.size(); ++i) {
-             solver_vector(i) = solid_3d.solution_n[i];
-         }
-       Eigen::VectorXd solver_gradient=-1*inv_dense_matrix*D*solver_vector;
-	   */
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-
 
 
 	Problem()
@@ -92,32 +31,16 @@ struct Problem {
 		, xmax(n, 5.0)
 	{ 	  
 	
-	   //x_density_percell=x_density_coff*problem_mu;
-	   /*cell_array=new double[n];
-	   #pragma omp parallel for
-	   for(int i=0;i<n;i++){
-		   cell_array[i]=x_density_percell;
-	   }
-	   */
+
 	
 	}
 
-	/*void Obj(const double *x, double *f0x, double *fx) {
-		f0x[0] = 0;
-		for (int i = 0; i < n; ++i) {
-			f0x[0] += x[i]*x[i];
-		}
-		fx[0] = Squared(x[0] - 5) + Squared(x[1] - 2) + Squared(x[2] - 1) - 9;
-		fx[1] = Squared(x[0] - 3) + Squared(x[1] - 4) + Squared(x[2] - 3) - 9;
-	}
-	*/
-	void Obj(const double *x, double *f0x, double *fx) {
-		//J(x)=norm1(x);x is slover from Ax=b;
-		
+
+     void Obj(const double *x, double *f0x, double *fx) {
 	  deallog.depth_console(0);
-      Parameters::AllParameters parameters("parameters.prm");
-	  parameters.mu=x;//
-	  x_density_percell=parameters.mu;
+          Parameters::AllParameters parameters("parameters.prm");
+	  parameters.mu=x;//density as input,the original density has been changed
+	  x_density_percell=parameters.mu;//invoke parameter x_density_percell;
       if (parameters.automatic_differentiation_order == 0)
         {
           std::cout << "Assembly method: Residual and linearisation are computed manually." << std::endl;
@@ -140,16 +63,13 @@ struct Problem {
 		   cell_array[i]=x_density_percell;
 	   }
 	   
-       //double problem_mu=solid_3d.mu;//density of object
-	   
-	  //int active_cells=solid_3d.dofs_per_cell;//numbers of cells
 	  
 	  int active_cells=solid_3d.triangulation.n_active_cells();
-	  n=active_cells;
+	  n=active_cells;//changed the number of parameter n declared in Problem
 	   
 	   
 	   
-	   Eigen::SparseMatrix<double> eigen_tangent_matrix(solid_3d.tangent_matrix.m(), solid_3d.tangent_matrix.n());
+	  Eigen::SparseMatrix<double> eigen_tangent_matrix(solid_3d.tangent_matrix.m(), solid_3d.tangent_matrix.n());
        #pragma omp parallel for
        for (unsigned int i = 0; i < solid_3d.tangent_matrix.n(); ++i) {
           for (dealii::BlockSparseMatrix<double>::const_iterator it = solid_3d.tangent_matrix.begin(i);
@@ -158,26 +78,19 @@ struct Problem {
           }
         }
 		
-		/*
-		Eigen::MatrixXd dense_matrix = eigen_tangent_matrix.toDense();
-        Eigen::MatrixXd inv_dense_matrix = dense_matrix.inverse();
-		Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(dense_matrix);
-		*/
-        
-		dense_matrix = eigen_tangent_matrix.toDense();
+
+     	dense_matrix = eigen_tangent_matrix.toDense();
         inv_dense_matrix = dense_matrix.inverse();
-		//Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eigensolver(dense_matrix);
-		eigensolver(dense_matrix);
-		if (eigensolver.info() != Eigen::Success) {
+	eigensolver(dense_matrix);
+	if (eigensolver.info() != Eigen::Success) {
            std::cout << "Failed to compute eigenvalues." << std::endl;
-        return 1;
+           return 1;
        }
-		double norm2=0.0;
+		double norm2=0.0;//for root(x1^2+x2^2+..xn^2);
 		for(int i=0;i<dofs_all_num;i++){
 			
-			//f0x[i]=dense_matrix[i];
 			f0x[i]=solid_3d.solution_n[i];
-			fx[0]+=abs(f0x[i]);
+			fx[0]+=abs(f0x[i]);//destination function
 			norm2+=std::pow(f0x[i],2);
 		}
 				
@@ -186,7 +99,7 @@ struct Problem {
 				
 		for(int j=0;j<;j++){
 			if(fx[1]<=0){
-			fx[1]+=cell_array[i]-0.5*1;
+			fx[1]+=cell_array[i]-0.5*1;//constraint function
 			}
 		}
 				
@@ -195,8 +108,7 @@ struct Problem {
 
 	void ObjSens(const double *x, double *f0x, double *fx, double *df0dx, double *dfdx) {
 		
-		Obj(x, f0x, fx);
-	  
+	    Obj(x, f0x, fx);
 	    Eigen::VectorXd df0dx_vector(dofs_all_num);
 	    for(int i=0;i<dofs_all_num;i++){
 			
@@ -205,46 +117,27 @@ struct Problem {
 		}//求出目标函数导数df0dx
 			
 		
-		//>>>伴随法
-		Eigen::VectorXd eigenvalues = eigensolver.eigenvalues();
+	//>>>伴随法
+	Eigen::VectorXd eigenvalues = eigensolver.eigenvalues();//eigen value 
         Eigen::MatrixXd eigenvectors = eigensolver.eigenvectors();
-		Eigen::MatrixXd B = eigenvectors;
+	Eigen::MatrixXd B = eigenvectors;
         Eigen::MatrixXd D = Eigen::MatrixXd::Zero(B.cols(), B.cols());
-		#pragma omp parallel for
+	#pragma omp parallel for
         for (int i = 0; i < B.cols(); i++) {
           D(i, i) = std::sqrt(eigenvalues(i));
         }
-		
-	   //Eigen::VectorXd solver_vector(solid_3d.solution_n.size());
+
        Eigen::VectorXd solver_vector(dofs_all_num);
-       /* #pragma omp  parallel for
-       for (unsigned int i = 0; i < solid_3d.solution_n.size(); ++i) {
-             solver_vector(i) = solid_3d.solution_n[i];
-         }
-		*/ 
-	
 		 
        Eigen::VectorXd solver_gradient=-df0dx_vector.transpose()*inv_dense_matrix*D*f0x;
 	   
 	   for(int i=0;i<dofs_all_num;i++){
 		   
-		   dfdx[i]=solver_gradient[i];
+	     dfdx[i]=solver_gradient[i];
 		   
 	   }//求出梯度
 		
 	}
-	
-		/*void ObjSens(const double *x, double *f0x, double *fx, double *df0dx, double *dfdx) {
-		Obj(x, f0x, fx);
-		for (int i = 0; i < n; ++i) {
-			df0dx[i] = 2*x[i];
-		}
-		int k = 0;
-		dfdx[k++] = 2 * (x[0] - 5); dfdx[k++] = 2 * (x[0] - 3);
-		dfdx[k++] = 2 * (x[1] - 2); dfdx[k++] = 2 * (x[1] - 4);
-		dfdx[k++] = 2 * (x[2] - 1); dfdx[k++] = 2 * (x[2] - 3);
-	    }
-		*/
 };
 
 void Print(double *x, int n, const std::string &name = "x") {
